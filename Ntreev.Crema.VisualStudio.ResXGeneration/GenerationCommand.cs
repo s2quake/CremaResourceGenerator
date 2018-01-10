@@ -94,7 +94,7 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
         {
             if (sender is OleMenuCommand command)
             {
-                command.Enabled = this.IsEmbeddedResources();
+                command.Enabled = this.IsResourceFiles();
             }
         }
 
@@ -106,7 +106,7 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
             }
         }
 
-        private bool IsEmbeddedResources()
+        private bool IsResourceFiles()
         {
             var dte = this.ServiceProvider.GetService(typeof(SDTE)) as EnvDTE80.DTE2;
             if (dte.SelectedItems.Count == 0)
@@ -122,7 +122,7 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
                 if (projectItem.IsEmbeddedResource() == false)
                     return false;
 
-                if (projectItem.GetResourceCulture() != null)
+                if (Path.GetExtension(projectItem.GetFileName()) != ".resx")
                     return false;
             }
 

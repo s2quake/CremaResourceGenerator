@@ -24,7 +24,8 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
     static class ProjectItemExtensions
     {
         public const string EmbeddedResourceType = "EmbeddedResource";
-        public const string CustomTool = "ResXFileCodeGenerator";
+        public const string ResXFileCodeGenerator = "ResXFileCodeGenerator";
+        public const string PublicResXFileCodeGenerator = "PublicResXFileCodeGenerator";
 
         public static bool GetIsDependentFile(this ProjectItem projectItem)
         {
@@ -100,7 +101,7 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
 
         public static bool IsEmbeddedResource(this ProjectItem projectItem)
         {
-            return projectItem.GetItemType() == EmbeddedResourceType && projectItem.GetCustomTool() == CustomTool;
+            return projectItem.GetItemType() == EmbeddedResourceType;
         }
 
         private static object GetProperty(this ProjectItem projectItem, string propertyName)
@@ -164,9 +165,13 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
                     writer.Close();
                 }
 
-                if (projectItem.GetCustomTool() != string.Empty)
+                if (projectItem.GetCustomTool() == ResXFileCodeGenerator)
                 {
-                    WriteDesigner(projectItem, dataTable);
+                    WriteDesigner(projectItem, dataTable, false);
+                }
+                else if (projectItem.GetCustomTool() == PublicResXFileCodeGenerator)
+                {
+                    WriteDesigner(projectItem, dataTable, true);
                 }
             }
             else
@@ -175,7 +180,7 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
             }
         }
 
-        private static void WriteDesigner(this ProjectItem projectItem, CremaDataTable dataTable)
+        private static void WriteDesigner(this ProjectItem projectItem, CremaDataTable dataTable, bool isPublic)
         {
             var project = projectItem.ContainingProject;
             var projectPath = Path.GetDirectoryName(project.GetFullName());
@@ -183,8 +188,7 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
             var resxFileName = projectItem.GetFullPath();
             var ss = StringUtility.SplitPath(Path.GetDirectoryName(projectItem.GetLocalPath()));
             var codeNamespace = $"{project.GetRootNamespace()}.{string.Join(".", ss)}";
-            var baseName = Path.GetFileNameWithoutExtension(project.GetLocalPath());
-            var isPublic = projectItem.IsPublicResource();
+            var baseName = Path.GetFileNameWithoutExtension(projectItem.GetLocalPath());
 
             using (var sw = new StreamWriter(designerFileName))
             {
@@ -205,50 +209,50 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
             }
         }
 
-        private static bool IsPublicResource(this ProjectItem projectItem)
-        {
-            var project = projectItem.ContainingProject;
-            using (var reader = XmlReader.Create(project.GetFullName()))
-            {
-                var doc = XDocument.Load(reader);
-                var ns = doc.Root.GetDefaultNamespace();
-                var namespaceManager = new XmlNamespaceManager(reader.NameTable);
-                namespaceManager.AddNamespace("xs", ns.NamespaceName);
+        //private static bool IsPublicResource(this ProjectItem projectItem)
+        //{
+        //    var project = projectItem.ContainingProject;
+        //    using (var reader = XmlReader.Create(project.GetFullName()))
+        //    {
+        //        var doc = XDocument.Load(reader);
+        //        var ns = doc.Root.GetDefaultNamespace();
+        //        var namespaceManager = new XmlNamespaceManager(reader.NameTable);
+        //        namespaceManager.AddNamespace("xs", ns.NamespaceName);
 
-                var elements = doc.Root.XPathSelectElements($"/xs:Project/xs:ItemGroup/xs:EmbeddedResource", namespaceManager);
+        //        var elements = doc.Root.XPathSelectElements($"/xs:Project/xs:ItemGroup/xs:EmbeddedResource", namespaceManager);
 
-                foreach (var element in elements)
-                {
-                    var attr = element.Attribute(XName.Get("Include", string.Empty));
+        //        foreach (var element in elements)
+        //        {
+        //            var attr = element.Attribute(XName.Get("Include", string.Empty));
 
-                    var match = Regex.Match(attr.Value, "(.+)[.]([^.]+)([.]resx)$");
-                    if (match.Success == true)
-                    {
-                        //this.CultureInfo = CultureInfo.GetCultureInfo(match.Groups[2].Value);
-                        //this.Name = match.Groups[1].Value + match.Groups[3].Value;
-                        //this.FileName = attr.Value;
-                    }
-                    else
-                    {
-                        //this.Name = attr.Value;
-                        //this.FileName = attr.Value;
-                    }
+        //            var match = Regex.Match(attr.Value, "(.+)[.]([^.]+)([.]resx)$");
+        //            if (match.Success == true)
+        //            {
+        //                //this.CultureInfo = CultureInfo.GetCultureInfo(match.Groups[2].Value);
+        //                //this.Name = match.Groups[1].Value + match.Groups[3].Value;
+        //                //this.FileName = attr.Value;
+        //            }
+        //            else
+        //            {
+        //                //this.Name = attr.Value;
+        //                //this.FileName = attr.Value;
+        //            }
 
-                    var name = attr.Value.Replace(Path.DirectorySeparatorChar, PathUtility.SeparatorChar);
-                    if (name != projectItem.GetLocalPath())
-                        continue;
+        //            var name = attr.Value.Replace(Path.DirectorySeparatorChar, PathUtility.SeparatorChar);
+        //            if (name != projectItem.GetLocalPath())
+        //                continue;
 
 
-                    var e1 = element.XPathSelectElement("./xs:Generator", namespaceManager);
-                    if (e1 != null)
-                    {
-                        return e1.Value == "PublicResXFileCodeGenerator";
-                    }
-                }
-            }
+        //            var e1 = element.XPathSelectElement("./xs:Generator", namespaceManager);
+        //            if (e1 != null)
+        //            {
+        //                return e1.Value == "PublicResXFileCodeGenerator";
+        //            }
+        //        }
+        //    }
 
-            return false;
-        }
+        //    return false;
+        //}
 
         private static CremaDataTable FindTable(ProjectItem projectItem, CremaDataTable projectInfoTable)
         {
