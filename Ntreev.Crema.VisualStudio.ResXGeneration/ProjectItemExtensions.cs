@@ -24,6 +24,7 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
     static class ProjectItemExtensions
     {
         public const string EmbeddedResourceType = "EmbeddedResource";
+        public const string CustomTool = "ResXFileCodeGenerator";
 
         public static bool GetIsDependentFile(this ProjectItem projectItem)
         {
@@ -99,7 +100,7 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
 
         public static bool IsEmbeddedResource(this ProjectItem projectItem)
         {
-            return projectItem.GetItemType() == EmbeddedResourceType;
+            return projectItem.GetItemType() == EmbeddedResourceType && projectItem.GetCustomTool() == CustomTool;
         }
 
         private static object GetProperty(this ProjectItem projectItem, string propertyName)

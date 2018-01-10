@@ -12,7 +12,7 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
 {
     static class SolutionExtensions
     {
-        //public const string lkj;
+        private const string vsProjectKindSolutionFolder = "{66A26720-8FB5-11D2-AA7E-00C04F688DDE}";
 
         public static string GetFullName(this Solution solution)
         {
@@ -103,12 +103,48 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
             throw new InvalidOperationException();
         }
 
-        public static IEnumerable<Project> CollectProjects(this Solution solution)
+        public static IEnumerable<Project> GetProjects(this Solution solution)
         {
-            for (var i = 1; i <= solution.Projects.Count; i++)
+            var projects = solution.Projects;
+            var enumerator = projects.GetEnumerator();
+            while (enumerator.MoveNext())
             {
-                var item = solution.Projects.Item(i);
-                yield return item;
+                if (enumerator.Current is Project project)
+                {
+                    if (project.Kind == vsProjectKindSolutionFolder)
+                    {
+                        foreach (var i in GetSolutionFolderProjects(project))
+                        {
+                            yield return i;
+                        }
+                    }
+                    else
+                    {
+                        yield return project;
+                    }
+                }
+            }
+        }
+
+        private static IEnumerable<Project> GetSolutionFolderProjects(Project solutionFolder)
+        {
+            for (var i = 1; i <= solutionFolder.ProjectItems.Count; i++)
+            {
+                var subProject = solutionFolder.ProjectItems.Item(i).SubProject;
+                if (subProject != null)
+                {
+                    if (subProject.Kind == vsProjectKindSolutionFolder)
+                    {
+                        foreach (var item in GetSolutionFolderProjects(subProject))
+                        {
+                            yield return item;
+                        }
+                    }
+                    else
+                    {
+                        yield return subProject;
+                    }
+                }
             }
         }
     }

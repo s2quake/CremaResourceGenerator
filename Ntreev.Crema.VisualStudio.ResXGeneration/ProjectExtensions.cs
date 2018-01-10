@@ -71,32 +71,32 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
             }
         }
 
-        public static void Write(this Project project, CremaDataTable projectInfoTable)
-        {
-            var items = CollectProjectItems(project);
+        //public static void Write(this Project project, CremaDataTable projectInfoTable)
+        //{
+        //    var items = CollectProjectItems(project);
 
-            var successCount = 0;
-            var failCount = 0;
+        //    var successCount = 0;
+        //    var failCount = 0;
 
-            GenerationOutput.WriteLine($"------ Start To Update Crema Resources: Project: {project.Name} ------");
-            foreach (var item in project.CollectProjectItems())
-            {
-                try
-                {
-                    item.Write(projectInfoTable);
-                    GenerationOutput.WriteLine($" >{item.GetFullPath()}");
-                    successCount++;
-                }
-                catch (Exception ex)
-                {
-                    GenerationOutput.WriteLine($"X>{item.GetFullPath()}:  error: {ex.Message}");
-                    failCount++;
-                }
-            }
-            GenerationOutput.WriteLine($"========== Update: Success {successCount}, Fail {failCount}: {DateTime.Now} ==========");
-        }
+        //    GenerationOutput.WriteLine($"------ Update from {settings.Address}.{settings.DataBase}.{settings.ProjectInfo}: Project: {project.Name} ------");
+        //    foreach (var item in project.CollectProjectItems())
+        //    {
+        //        try
+        //        {
+        //            item.Write(projectInfoTable);
+        //            GenerationOutput.WriteLine($"O>{item.GetFullPath()}");
+        //            successCount++;
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            GenerationOutput.WriteLine($" >{item.GetFullPath()}:  error: {ex.Message}");
+        //            failCount++;
+        //        }
+        //    }
+        //    GenerationOutput.WriteLine($"========== Update: Success {successCount}, Fail {failCount}: {DateTime.Now} ==========");
+        //}
 
-        public static IEnumerable<ProjectItem> CollectProjectItems(this Project project)
+        public static IEnumerable<ProjectItem> GetProjectItems(this Project project)
         {
             if (project.ProjectItems != null)
             {

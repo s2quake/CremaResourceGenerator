@@ -80,9 +80,11 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
                 var solutionMenuItem = new OleMenuCommand(this.SolutionMenuItemCallback, solutionMenuCommandID);
                 commandService.AddCommand(solutionMenuItem);
 
+#if DEBUG
                 var debugMenuCommandID = new CommandID(CommandSet, DebugCommandId);
                 var debugMenuItem = new OleMenuCommand(this.DebugMenuItemCallback, debugMenuCommandID);
                 commandService.AddCommand(debugMenuItem);
+#endif
             }
 
             this.container = new CompositionContainer(new AssemblyCatalog(typeof(IRuntimeService).Assembly));
@@ -110,8 +112,6 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
             if (dte.SelectedItems.Count == 0)
                 return false;
 
-            dte.Solution.GetAddress();
-
             for (var i = 1; i <= dte.SelectedItems.Count; i++)
             {
                 var item = dte.SelectedItems.Item(i);
@@ -120,6 +120,9 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
 
                 var projectItem = item.ProjectItem;
                 if (projectItem.IsEmbeddedResource() == false)
+                    return false;
+
+                if (projectItem.GetResourceCulture() != null)
                     return false;
             }
 
@@ -184,24 +187,22 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
 
             var successCount = 0;
             var failCount = 0;
-            GenerationOutput.WriteLine("------ Start To Update Crema Resources: Selected Resource Files ------");
-
+            GenerationOutput.WriteLine($"------ Update from {settings.Address} \"{settings.DataBase}\" \"{settings.ProjectInfo}\": Selected Resource Files ------");
             foreach (var item in this.GetSelectedItems())
             {
                 try
                 {
                     item.Write(projectInfoTable);
-                    GenerationOutput.WriteLine($" >{item.GetFullPath()}");
+                    GenerationOutput.WriteLine($"O>{item.GetFullPath()}");
                     successCount++;
                 }
                 catch (Exception ex)
                 {
-                    GenerationOutput.WriteLine($"X>{item.GetFullPath()}:  error: {ex.Message}");
+                    GenerationOutput.WriteLine($" >{item.GetFullPath()}:  error: {ex.Message}");
                     failCount++;
                 }
             }
-
-            GenerationOutput.WriteLine($"========== Update: Success {successCount}, Fail {failCount} : {DateTime.Now} ==========");
+            GenerationOutput.WriteLine($"========== Update: Success {successCount}, Fail {failCount}: {DateTime.Now} ==========");
             GenerationOutput.WriteLine();
         }
 
@@ -215,7 +216,7 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
 
             foreach (var item in this.GetSelectedProjects())
             {
-                item.Write(projectInfoTable);
+                this.Write(item, settings, projectInfoTable);
             }
             GenerationOutput.WriteLine();
         }
@@ -228,17 +229,11 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
             var dataSet = SerializationUtility.Create(data);
             var projectInfoTable = dataSet.Tables[settings.ProjectInfo];
 
-
-            foreach (var item in this.Solution)
+            foreach (var item in this.Solution.GetProjects())
             {
-                int qwer = 0;
+                this.Write(item, settings, projectInfoTable);
             }
-            //for (var i = 1; i <= this.Solution.Projects.Count; i++)
-            //{
-            //    var item = this.Solution.Projects.Item(i);
-            //    item.Write(projectInfoTable);
-            //}
-            //GenerationOutput.WriteLine();
+            GenerationOutput.WriteLine();
         }
 
         private void DebugMenuItemCallback(object sender, EventArgs e)
@@ -249,54 +244,37 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
             }
         }
 
-        //private void Write(ProjectItem projectItem, CremaDataTable projectInfoTable)
-        //{
-        //    if (this.FindTable(projectInfoTable, projectItem) is CremaDataTable itemTable)
-        //    {
-        //        try
-        //        {
-        //            projectItem.Write(itemTable);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            VsShellUtilities.ShowMessageBox(this.ServiceProvider, ex.Message, "Error",
-        //                OLEMSGICON.OLEMSGICON_CRITICAL, OLEMSGBUTTON.OLEMSGBUTTON_OK, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-        //        }
-        //    }
-        //}
+        private void Write(Project project, ResXInfo settings, CremaDataTable projectInfoTable)
+        {
+            var successCount = 0;
+            var failCount = 0;
 
-        //private CremaDataTable FindTable(CremaDataTable projectInfoTable, ProjectItem projectItem)
-        //{
-        //    var project = projectItem.ContainingProject;
-        //    var projectPath = project.GetLocalPath();
-        //    var projectItemPath = projectItem.GetLocalPathWithoutCultureInfo();
-        //    var dataSet = projectInfoTable.DataSet;
+            var items = project.GetProjectItems();
 
-        //    foreach (var item in projectInfoTable.Rows)
-        //    {
-        //        if (item["ProjectPath"] is string text && text == projectPath)
-        //        {
-        //            if (GetExportInfo(item) is CremaDataRow exportInfoRow)
-        //            {
-        //                return dataSet.Tables[exportInfoRow["TableName"] as string];
-        //            }
-        //        }
-        //    }
-
-        //    return null;
-
-        //    CremaDataRow GetExportInfo(CremaDataRow dataRow)
-        //    {
-        //        foreach (var item in dataRow.GetChildRows("ExportInfo"))
-        //        {
-        //            if (item["FileName"] is string text && text == projectItemPath)
-        //            {
-        //                return item;
-        //            }
-        //        }
-        //        return null;
-        //    }
-        //}
+            if (items.Any() == true)
+            {
+                GenerationOutput.WriteLine($"------ Update from {settings.Address} \"{settings.DataBase}\" \"{settings.ProjectInfo}\": Project: {project.Name} ------");
+                foreach (var item in project.GetProjectItems())
+                {
+                    try
+                    {
+                        item.Write(projectInfoTable);
+                        GenerationOutput.WriteLine($"O>{item.GetFullPath()}");
+                        successCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        GenerationOutput.WriteLine($" >{item.GetFullPath()}:  error: {ex.Message}");
+                        failCount++;
+                    }
+                }
+                GenerationOutput.WriteLine($"========== Update: Success {successCount}, Fail {failCount}: {DateTime.Now} ==========");
+            }
+            else
+            {
+                GenerationOutput.WriteLine($"========== skip: {project.Name} has no resources file. ==========");
+            }
+        }
 
         private IEnumerable<ProjectItem> GetSelectedItems()
         {
