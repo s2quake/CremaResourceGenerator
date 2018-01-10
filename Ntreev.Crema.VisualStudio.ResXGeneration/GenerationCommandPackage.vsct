@@ -68,15 +68,15 @@
         </Strings>
       </Button>
 
-      <Button guid="guidGenerationCommandPackageCmdSet" id="DebugCommandId" priority="0x0100" type="Button">
+      <!--<Button guid="guidGenerationCommandPackageCmdSet" id="DebugCommandId" priority="0x0100" type="Button">
         <Parent guid="guidGenerationCommandPackageCmdSet" id="ItemMenuGroup" />
         <Icon guid="guidImages" id="bmpPic1" />
-        <!--<CommandFlag>DynamicVisibility</CommandFlag>-->
-        <!--<CommandFlag>DefaultInvisible</CommandFlag>-->
+        --><!--<CommandFlag>DynamicVisibility</CommandFlag>--><!--
+        --><!--<CommandFlag>DefaultInvisible</CommandFlag>--><!--
         <Strings>
           <ButtonText>Debug</ButtonText>
         </Strings>
-      </Button>
+      </Button>-->
 
       <Button guid="guidGenerationCommandPackageCmdSet" id="ProjectCommandId" priority="0x0100" type="Button">
         <Parent guid="guidGenerationCommandPackageCmdSet" id="ProjectMenuGroup" />

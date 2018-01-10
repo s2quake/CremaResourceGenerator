@@ -80,11 +80,11 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
                 var solutionMenuItem = new OleMenuCommand(this.SolutionMenuItemCallback, solutionMenuCommandID);
                 commandService.AddCommand(solutionMenuItem);
 
-#if DEBUG
-                var debugMenuCommandID = new CommandID(CommandSet, DebugCommandId);
-                var debugMenuItem = new OleMenuCommand(this.DebugMenuItemCallback, debugMenuCommandID);
-                commandService.AddCommand(debugMenuItem);
-#endif
+//#if DEBUG
+//                var debugMenuCommandID = new CommandID(CommandSet, DebugCommandId);
+//                var debugMenuItem = new OleMenuCommand(this.DebugMenuItemCallback, debugMenuCommandID);
+//                commandService.AddCommand(debugMenuItem);
+//#endif
             }
 
             this.container = new CompositionContainer(new AssemblyCatalog(typeof(IRuntimeService).Assembly));
