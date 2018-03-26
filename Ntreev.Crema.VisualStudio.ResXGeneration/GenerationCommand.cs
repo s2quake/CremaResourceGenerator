@@ -181,7 +181,7 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
         {
             var runtimeService = this.container.GetExportedValue<IRuntimeService>();
             var settings = this.Solution.GetSettings();
-            var data = runtimeService.GetDataGenerationData(settings.Address, settings.DataBase, $"{TagInfo.All}", null, false, -1);
+            var data = runtimeService.GetDataGenerationData(settings.Address, settings.DataBase, $"{TagInfo.All}", string.Empty, false, -1);
             var dataSet = SerializationUtility.Create(data);
             var projectInfoTable = dataSet.Tables[settings.ProjectInfo];
 
@@ -210,7 +210,7 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
         {
             var runtimeService = this.container.GetExportedValue<IRuntimeService>();
             var settings = this.Solution.GetSettings();
-            var data = runtimeService.GetDataGenerationData(settings.Address, settings.DataBase, $"{TagInfo.All}", null, false, -1);
+            var data = runtimeService.GetDataGenerationData(settings.Address, settings.DataBase, $"{TagInfo.All}", string.Empty, false, -1);
             var dataSet = SerializationUtility.Create(data);
             var projectInfoTable = dataSet.Tables[settings.ProjectInfo];
 
@@ -225,7 +225,7 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
         {
             var runtimeService = this.container.GetExportedValue<IRuntimeService>();
             var settings = this.Solution.GetSettings();
-            var data = runtimeService.GetDataGenerationData(settings.Address, settings.DataBase, $"{TagInfo.All}", null, false, -1);
+            var data = runtimeService.GetDataGenerationData(settings.Address, settings.DataBase, $"{TagInfo.All}", string.Empty, false, -1);
             var dataSet = SerializationUtility.Create(data);
             var projectInfoTable = dataSet.Tables[settings.ProjectInfo];
 
