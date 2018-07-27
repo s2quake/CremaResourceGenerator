@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="77dd43cf-eb0b-4b63-8f0d-b822f3fe48bc" Version="1.0.1885.1535" Language="en-US" Publisher="s2quake" />
+        <Identity Id="77dd43cf-eb0b-4b63-8f0d-b822f3fe48bc" Version="4.0.18208.1348" Language="en-US" Publisher="s2quake" />
         <DisplayName>Crema Resource Generator</DisplayName>
         <Description xml:space="preserve">크레마 서버에 연결하여 Visual Studio 2017에서 사용하는 Resources.resx 형태로 만들어주는 확장 프로그램</Description>
         <Icon>app.png</Icon>

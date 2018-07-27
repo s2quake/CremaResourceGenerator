@@ -1,3 +1,3 @@
 [submodule "sub-modules/crema"]
 	path = sub-modules/crema
-	url = http://gamma:10080/devhq/CremaBinaries.git
+	url = http://gamma:10080/bin/Crema.git
