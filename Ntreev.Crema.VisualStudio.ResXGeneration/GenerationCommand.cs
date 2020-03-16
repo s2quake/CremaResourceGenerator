@@ -122,7 +122,8 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
                 if (projectItem.IsEmbeddedResource() == false)
                     return false;
 
-                if (Path.GetExtension(projectItem.GetFileName()) != ".resx")
+                var extension = Path.GetExtension(projectItem.GetFileName());
+                if (extension != ".resx" && extension != ".Resources.cs")
                     return false;
             }
 
@@ -177,63 +178,84 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
         /// </summary>
         /// <param name="sender">Event sender.</param>
         /// <param name="e">Event args.</param>
-        private void ItemMenuItemCallback(object sender, EventArgs e)
+        private async void ItemMenuItemCallback(object sender, EventArgs e)
         {
-            var runtimeService = this.container.GetExportedValue<IRuntimeService>();
-            var settings = this.Solution.GetSettings();
-            var data = runtimeService.GetDataGenerationData(settings.Address, settings.DataBase, $"{TagInfo.All}", string.Empty, false, -1);
-            var dataSet = SerializationUtility.Create(data);
-            var projectInfoTable = dataSet.Tables[settings.ProjectInfo];
-
-            var successCount = 0;
-            var failCount = 0;
-            GenerationOutput.WriteLine($"------ Update from {settings.Address} \"{settings.DataBase}\" \"{settings.ProjectInfo}\": Selected Resource Files ------");
-            foreach (var item in this.GetSelectedItems())
+            try
             {
-                try
+                var runtimeService = this.container.GetExportedValue<IRuntimeService>();
+                var settings = this.Solution.GetSettings();
+                var data = await runtimeService.GetDataGenerationDataAsync(settings.Address, settings.DataBase, $"{TagInfo.All}", string.Empty, null);
+                var dataSet = SerializationUtility.Create(data);
+                var projectInfoTable = dataSet.Tables[settings.ProjectInfo];
+
+                var successCount = 0;
+                var failCount = 0;
+                GenerationOutput.WriteLine($"------ Update from {settings.Address} \"{settings.DataBase}\" \"{settings.ProjectInfo}\": Selected Resource Files ------");
+                foreach (var item in this.GetSelectedItems())
                 {
-                    item.Write(projectInfoTable);
-                    GenerationOutput.WriteLine($"O>{item.GetFullPath()}");
-                    successCount++;
+                    try
+                    {
+                        item.Write(projectInfoTable);
+                        GenerationOutput.WriteLine($"O>{item.GetFullPath()}");
+                        successCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        GenerationOutput.WriteLine($" >{item.GetFullPath()}:  error: {ex.Message}");
+                        failCount++;
+                    }
                 }
-                catch (Exception ex)
-                {
-                    GenerationOutput.WriteLine($" >{item.GetFullPath()}:  error: {ex.Message}");
-                    failCount++;
-                }
+                GenerationOutput.WriteLine($"========== Update: Success {successCount}, Fail {failCount}: {DateTime.Now} ==========");
+                GenerationOutput.WriteLine();
             }
-            GenerationOutput.WriteLine($"========== Update: Success {successCount}, Fail {failCount}: {DateTime.Now} ==========");
-            GenerationOutput.WriteLine();
+            catch (Exception ex)
+            {
+                GenerationOutput.WriteLine($" > :  error: {ex.Message}");
+            }
         }
 
-        private void ProjectMenuItemCallback(object sender, EventArgs e)
+        private async void ProjectMenuItemCallback(object sender, EventArgs e)
         {
             var runtimeService = this.container.GetExportedValue<IRuntimeService>();
             var settings = this.Solution.GetSettings();
-            var data = runtimeService.GetDataGenerationData(settings.Address, settings.DataBase, $"{TagInfo.All}", string.Empty, false, -1);
-            var dataSet = SerializationUtility.Create(data);
-            var projectInfoTable = dataSet.Tables[settings.ProjectInfo];
-
-            foreach (var item in this.GetSelectedProjects())
+            try
             {
-                this.Write(item, settings, projectInfoTable);
+                var data = await runtimeService.GetDataGenerationDataAsync(settings.Address, settings.DataBase, $"{TagInfo.All}", string.Empty, null);
+                var dataSet = SerializationUtility.Create(data);
+                var projectInfoTable = dataSet.Tables[settings.ProjectInfo];
+
+                foreach (var item in this.GetSelectedProjects())
+                {
+                    this.Write(item, settings, projectInfoTable);
+                }
+                GenerationOutput.WriteLine();
             }
-            GenerationOutput.WriteLine();
+            catch (Exception ex)
+            {
+                GenerationOutput.WriteLine($" > :  error: {ex.Message}");
+            }
         }
 
-        private void SolutionMenuItemCallback(object sender, EventArgs e)
+        private async void SolutionMenuItemCallback(object sender, EventArgs e)
         {
             var runtimeService = this.container.GetExportedValue<IRuntimeService>();
             var settings = this.Solution.GetSettings();
-            var data = runtimeService.GetDataGenerationData(settings.Address, settings.DataBase, $"{TagInfo.All}", string.Empty, false, -1);
-            var dataSet = SerializationUtility.Create(data);
-            var projectInfoTable = dataSet.Tables[settings.ProjectInfo];
-
-            foreach (var item in this.Solution.GetProjects())
+            try
             {
-                this.Write(item, settings, projectInfoTable);
+                var data = await runtimeService.GetDataGenerationDataAsync(settings.Address, settings.DataBase, $"{TagInfo.All}", string.Empty, null);
+                var dataSet = SerializationUtility.Create(data);
+                var projectInfoTable = dataSet.Tables[settings.ProjectInfo];
+
+                foreach (var item in this.Solution.GetProjects())
+                {
+                    this.Write(item, settings, projectInfoTable);
+                }
+                GenerationOutput.WriteLine();
             }
-            GenerationOutput.WriteLine();
+            catch (Exception ex)
+            {
+                GenerationOutput.WriteLine($" > :  error: {ex.Message}");
+            }
         }
 
         private void DebugMenuItemCallback(object sender, EventArgs e)

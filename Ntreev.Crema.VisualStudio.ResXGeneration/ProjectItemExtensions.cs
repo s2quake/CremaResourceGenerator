@@ -276,7 +276,7 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
 
             CremaDataRow GetExportInfo(CremaDataRow dataRow)
             {
-                foreach (var item in dataRow.GetChildRows("ExportInfo"))
+                foreach (var item in dataRow.GetChildRows($"{projectInfoTable.Name}.ExportInfo"))
                 {
                     if (item["FileName"] is string text && text == projectItemPath)
                     {
