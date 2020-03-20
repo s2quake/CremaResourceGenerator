@@ -4,6 +4,7 @@ using Ntreev.Library;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -59,16 +60,7 @@ namespace Ntreev.Crema.VisualStudio.ResXGeneration
 
         public static string GetRootNamespace(this Project project)
         {
-            using (var reader = XmlReader.Create(project.GetFullName()))
-            {
-                var doc = XDocument.Load(reader);
-                var ns = doc.Root.GetDefaultNamespace();
-                var namespaceManager = new XmlNamespaceManager(reader.NameTable);
-                namespaceManager.AddNamespace("xs", ns.NamespaceName);
-
-                var element = doc.Root.XPathSelectElement($"/xs:Project/xs:PropertyGroup/xs:RootNamespace", namespaceManager);
-                return element.Value;
-            }
+            return Path.GetFileNameWithoutExtension(project.GetFullName());
         }
 
         //public static void Write(this Project project, CremaDataTable projectInfoTable)
